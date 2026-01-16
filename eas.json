@@ -15,7 +15,14 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "android": { 
+        "buildType": "apk",
+        "env": {
+          "AMAP_API_KEY": "你的高德地图API_KEY"
+        }
+      },
+      "prebuildCommand": "node scripts/configure-amap.js"
     }
   },
   "submit": {

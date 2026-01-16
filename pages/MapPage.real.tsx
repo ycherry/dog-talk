@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
-import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
+import { StyleSheet, View, Dimensions, Platform } from 'react-native';
+import MapView, { Marker, Circle, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 
@@ -19,48 +19,60 @@ export default function MapPageReal({
   mapRef, 
   mapType 
 }: MapPageRealProps) {
-  const [region, setRegion] = useState({
+  const [region, setRegion] = useState<Region>({
     latitude: 31.22,
     longitude: 121.48,
     latitudeDelta: 0.02,
     longitudeDelta: 0.02,
   });
   
-  const [petLocation] = useState({
+  const [petLocation] = useState<LatLng>({
     latitude: 31.218,
     longitude: 121.475,
   });
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-        return;
-      }
+    const getLocation = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          console.log('Permission to access location was denied');
+          return;
+        }
 
-      let location = await Location.getCurrentPositionAsync({});
-      setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
-      });
-    })();
+        const location = await Location.getCurrentPositionAsync({});
+        setRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.02,
+          longitudeDelta: 0.02,
+        });
+      } catch (error) {
+        console.error('Error getting location:', error);
+      }
+    };
+
+    getLocation();
   }, []);
 
-  return (
-    <MapView
-      ref={mapRef}
-      style={styles.map}
-      initialRegion={region}
-      mapType={mapType}
-      provider={PROVIDER_GOOGLE}
-      showsUserLocation={true}
-      showsMyLocationButton={false}
-      showsCompass={true}
-      showsScale={true}
-    >
+  // 地图配置
+  const mapProps = {
+    ref: mapRef,
+    style: styles.map,
+    initialRegion: region,
+    mapType,
+    showsUserLocation: true,
+    showsMyLocationButton: false,
+    showsCompass: true,
+    showsScale: true,
+  };
+
+  // 根据平台选择provider
+  const provider = Platform.OS === 'android' ? 'amap' : PROVIDER_GOOGLE;
+
+  // 公共的地图内容
+  const mapContent = (
+    <>
       <Marker
         coordinate={petLocation}
         title="宠物位置"
@@ -72,7 +84,7 @@ export default function MapPageReal({
           </View>
         </View>
       </Marker>
-      
+
       <Circle
         center={petLocation}
         radius={50}
@@ -80,6 +92,12 @@ export default function MapPageReal({
         strokeColor="rgba(135, 206, 250, 0.8)"
         strokeWidth={2}
       />
+    </>
+  );
+
+  return (
+    <MapView {...mapProps} provider={provider}>
+      {mapContent}
     </MapView>
   );
 }

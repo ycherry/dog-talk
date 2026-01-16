@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import MapPage from './pages/MapPage';
 import DevicesPage from './pages/DevicesPage';
 import TranslatePage from './pages/TranslatePage';
-import TrajectoryPage from './pages/TrajectoryPage';
+import TalkHistoryPage from './pages/TalkHistoryPage';
 import MyProfilePage from './pages/MyProfilePage';
 import LoginPage from './pages/LoginPage';
 import AddDevicePage from './pages/AddDevicePage';
@@ -53,12 +53,12 @@ function MainTabs() {
         }}
       />
       <Tab.Screen 
-        name="Trajectory" 
-        component={TrajectoryPage}
+        name="TalkHistory" 
+        component={TalkHistoryPage}
         options={{ 
-          title: 'Trajectory',
+          title: 'Wang log',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="navigate" color={color} size={size} />
+            <Ionicons name="chatbubble-ellipses" color={color} size={size} />
           ),
         }}
       />

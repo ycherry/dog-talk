@@ -15,9 +15,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dogtalk.app",
-      "config": {
-        "googleMapsApiKey": "YOUR_IOS_GOOGLE_MAPS_API_KEY"
-      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "此应用需要访问您的位置以显示您和宠物在地图上的位置。",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "此应用需要访问您的位置以跟踪宠物位置。",
@@ -37,12 +34,7 @@
         "ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
-      ],
-      "config": {
-        "googleMaps": {
-          "apiKey": "YOUR_ANDROID_GOOGLE_MAPS_API_KEY"
-        }
-      }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -52,6 +44,12 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "此应用需要访问您的位置以显示您和宠物在地图上的位置。"
+        }
+      ],
+      [
+        "react-native-maps",
+        {
+          "enableAMAP": true
         }
       ]
     ],
