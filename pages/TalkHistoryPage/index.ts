@@ -1,0 +1,1 @@
+export { TalkHistoryPage } from "./TalkHistoryPage";

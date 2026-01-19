@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 
-export default function LoginPage() {
+export const LoginPageContent = () => {
   const navigation: any = useNavigation()
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')

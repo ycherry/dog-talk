@@ -7,10 +7,10 @@ import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 
 // Local images
-import avatarImg from '../assets/avatar.png';
-import dogImg from '../assets/dog.png';
+import avatarImg from '../../assets/avatar.png';
+import dogImg from '../../assets/dog.png';
 
-export default function TranslatePage() {
+export const TranslatePageContent = () => {
   const navigation = useNavigation();
   const [isRecording, setIsRecording] = useState(false);
   const leftScale = useRef(new Animated.Value(1)).current;
@@ -265,4 +265,4 @@ export default function TranslatePage() {
       </View>
     </View>
   );
-}
+};

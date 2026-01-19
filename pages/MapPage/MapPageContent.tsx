@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import MapPageMock from './MapPage.mock';
+import MapPageMock from '../MapPage.mock';
 
 // 检测是否在 Expo Go 中运行
 const isExpoGo = Constants.appOwnership === 'expo';
@@ -10,10 +10,10 @@ const isExpoGo = Constants.appOwnership === 'expo';
 // 动态导入真实地图组件（仅在非Expo Go环境）
 let MapPageReal: any = null;
 if (!isExpoGo) {
-  MapPageReal = require('./MapPage.real').default;
+  MapPageReal = require('../MapPage.real').default;
 }
 
-export default function MapPage() {
+export const MapPageContent = () => {
   const [mapType, setMapType] = useState<'standard' | 'satellite' | 'hybrid'>('standard');
   const mapRef = useRef<any>(null);
 
@@ -98,14 +98,6 @@ export default function MapPage() {
       >
         <Ionicons name="mic" size={32} color="white" />
       </TouchableOpacity>
-
-      {/* 右下角定位按钮 */}
-      <TouchableOpacity 
-        className="absolute bottom-[120px] right-4 bg-white rounded-full w-14 h-14 items-center justify-center shadow-md"
-        onPress={centerOnPet}
-      >
-        <Ionicons name="navigate" size={28} color="#333" />
-      </TouchableOpacity>
     </View>
   );
-}
+};

@@ -4,13 +4,13 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function AddDevicePage() {
+export const AddDevicePageContent = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const [deviceId, setDeviceId] = useState('');
 
   return (
-    <SafeAreaView className="flex-1 bg-white"> 
+    <SafeAreaView className="flex-1 bg-white">
       <View className="h-14 flex-row items-center justify-between px-3 border-b-[0.5px] border-gray-200">
         <TouchableOpacity onPress={() => navigation.goBack()} className="w-10 h-10 items-center justify-center">
           <Ionicons name="chevron-back" size={28} color="#333" />
@@ -45,4 +45,4 @@ export default function AddDevicePage() {
       </View>
     </SafeAreaView>
   );
-}
+};

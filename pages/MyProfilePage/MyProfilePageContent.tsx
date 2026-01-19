@@ -3,7 +3,7 @@ import { Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-export default function MyProfilePage() {
+export const MyProfilePageContent = () => {
   const navigation: any = useNavigation();
   const [isLoggedIn, setIsLoggedIn] = useState(true); // 假设已登录
 
@@ -74,4 +74,4 @@ export default function MyProfilePage() {
       </TouchableOpacity>
     </ScrollView>
   );
-}
+};

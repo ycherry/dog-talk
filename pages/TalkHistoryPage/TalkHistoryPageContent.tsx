@@ -123,7 +123,7 @@ const mockData: TalkRecord[] = [
   },
 ];
 
-export default function TalkHistoryPage() {
+export const TalkHistoryPageContent = () => {
   const navigation = useNavigation();
   const [activeType, setActiveType] = useState<'全部' | '汪汪' | '呜呜' | '哼哼' | '吠叫'>('全部');
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'all'>('all');
@@ -250,4 +250,4 @@ export default function TalkHistoryPage() {
       </View>
     </View>
   );
-}
+};

@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 type DevicesRouteProp = RouteProp<Record<string, any>, string>;
 
-export default function DevicesPage() {
+export const DevicesPageContent = () => {
   const navigation = useNavigation<NavigationProp<Record<string, object | undefined>>>();
   const route = useRoute<DevicesRouteProp>();
   const [devices, setDevices] = useState<string[]>([]);
@@ -43,4 +43,4 @@ export default function DevicesPage() {
       </TouchableOpacity>
     </View>
   );
-}
+};

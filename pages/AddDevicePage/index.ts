@@ -1,0 +1,1 @@
+export { AddDevicePage } from "./AddDevicePage";
