@@ -17,6 +17,7 @@
       "bundleIdentifier": "com.dogtalk.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "此应用需要访问您的位置以显示您和宠物在地图上的位置。",
+        "NSMicrophoneUsageDescription": "此应用需要访问麦克风以录制宠物与人的声音，用于翻译功能。",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "此应用需要访问您的位置以跟踪宠物位置。",
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -27,13 +28,13 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
       "package": "com.dogtalk.app",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "RECORD_AUDIO"
       ]
     },
     "web": {
@@ -46,12 +47,8 @@
           "locationAlwaysAndWhenInUsePermission": "此应用需要访问您的位置以显示您和宠物在地图上的位置。"
         }
       ],
-      [
-        "react-native-maps",
-        {
-          "enableAMAP": true
-        }
-      ]
+      "expo-font",
+      "expo-asset"
     ],
     "extra": {
       "eas": {
