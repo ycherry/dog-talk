@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 
 export default function LoginPage() {
@@ -14,65 +14,43 @@ export default function LoginPage() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container} style={{flex: 1}}>
+    <ScrollView contentContainerClassName="px-6 bg-white flex-grow justify-center" className="flex-1">
 
-      <Text style={styles.title}>欢迎登录</Text>
+      <Text className="text-3xl text-[#123b53] mt-0 font-bold text-center">欢迎登录</Text>
 
-      <View style={styles.inputContainer}>
+      <View className="border-b border-gray-200 mt-8 pb-1.5">
         <TextInput
           placeholder="请输入手机号"
-          style={styles.input}
+          className="h-10 text-base"
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
         />
       </View>
 
-      <View style={[styles.inputContainer, {flexDirection: 'row', alignItems: 'center'}]}>
+      <View className="flex-row items-center border-b border-gray-200 mt-8 pb-1.5">
         <TextInput
           placeholder="短信验证码"
-          style={[styles.input, {flex: 1}]}
+          className="flex-1 h-10 text-base"
           value={code}
           onChangeText={setCode}
         />
         <TouchableOpacity>
-          <Text style={styles.getCode}>获取验证码</Text>
+          <Text className="text-[#123b53] ml-2.5">获取验证码</Text>
         </TouchableOpacity>
       </View>
-      <Text style={styles.subtitle}>新手机号将直接注册并登录</Text>
+      <Text className="text-[#9aa9b1] mt-1.5">新手机号将直接注册并登录</Text>
       
-      <TouchableOpacity style={styles.checkboxRow} onPress={() => setAgree(!agree)}>
-        <View style={[styles.checkbox, agree && styles.checkboxChecked]} />
-        <Text style={styles.agreeText}>已阅读并同意《用户协议》和《隐私政策》</Text>
+      <TouchableOpacity className="flex-row items-center mt-5" onPress={() => setAgree(!agree)}>
+        <View className={`w-[18px] h-[18px] rounded-full border border-gray-300 mr-2 ${agree ? 'bg-[#123b53]' : ''}`} />
+        <Text className="text-[#7a8a92]">已阅读并同意《用户协议》和《隐私政策》</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.loginBtn} onPress={onLogin}>
-        <Text style={styles.loginBtnText}>登录</Text>
+      <TouchableOpacity className="mt-8 bg-[#053a56] py-4 rounded-xl items-center" onPress={onLogin}>
+        <Text className="text-white text-base font-semibold">登录</Text>
       </TouchableOpacity>
 
-      <View style={{height: 60}} />
+      <View className="h-[60px]" />
     </ScrollView>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    backgroundColor: '#fff',
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  back: {marginTop: 0},
-  backText: {fontSize: 20},
-  title: {fontSize: 28, color: '#123b53', marginTop: 0, fontWeight: '700', textAlign: 'center'},
-  subtitle: {color: '#9aa9b1', marginTop: 6},
-  inputContainer: {borderBottomWidth: 1, borderBottomColor: '#eee', marginTop: 30, paddingBottom: 6},
-  input: {height: 40, fontSize: 16},
-  getCode: {color: '#123b53', marginLeft: 10},
-  checkboxRow: {flexDirection: 'row', alignItems: 'center', marginTop: 20},
-  checkbox: {width: 18, height: 18, borderRadius: 9, borderWidth: 1, borderColor: '#ccc', marginRight: 8},
-  checkboxChecked: {backgroundColor: '#123b53'},
-  agreeText: {color: '#7a8a92'},
-  loginBtn: {marginTop: 30, backgroundColor: '#053a56', paddingVertical: 16, borderRadius: 12, alignItems: 'center'},
-  loginBtnText: {color: '#fff', fontSize: 16, fontWeight: '600'},
-})

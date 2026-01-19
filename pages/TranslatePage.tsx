@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, Animated, ImageSourcePropType, Platform, Alert } from 'react-native';
+import { Text, View, TouchableOpacity, Image, Animated, ImageSourcePropType, Platform, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
@@ -211,201 +211,58 @@ export default function TranslatePage() {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-white pt-15 px-5">
       {/* 标题 */}
-      <Text style={styles.title}>宠物翻译助手</Text>
+      <Text className="text-xl font-semibold text-gray-800 mb-8">宠物翻译助手</Text>
 
       {/* 人物和宠物头像区域（使用图片替代图标） */}
-      <View style={styles.avatarSection}>
-        <Animated.View style={[styles.avatarContainer, styles.iconAvatarContainer, { transform: [{ scale: leftScale }] }]}>
-          <View style={styles.avatarWrapper}>
-            <Image source={leftImage} style={styles.avatarImage} resizeMode="cover" />
+      <View className="flex-row items-center justify-between mb-8 px-2.5">
+        <Animated.View style={{ transform: [{ scale: leftScale }] }} className="relative items-center justify-center">
+          <View className="w-[120px] h-[120px] rounded-2xl overflow-hidden bg-gray-100 items-center justify-center">
+            <Image source={leftImage} className="w-full h-full" resizeMode="cover" />
           </View>
         </Animated.View>
 
-        <TouchableOpacity style={styles.swapButton} onPress={handleSwitch}>
+        <TouchableOpacity className="w-14 h-14 rounded-xl bg-[#1a3d5c] items-center justify-center mx-5" onPress={handleSwitch}>
           <Ionicons name="swap-horizontal" size={28} color="#fff" />
         </TouchableOpacity>
 
-        <Animated.View style={[styles.avatarContainer, styles.iconAvatarContainer, { transform: [{ scale: rightScale }] }]}>
-          <View style={styles.avatarWrapper}>
-            <Image source={rightImage} style={[styles.avatarImage, styles.dogAvatarImage]} resizeMode="cover" />
+        <Animated.View style={{ transform: [{ scale: rightScale }] }} className="relative items-center justify-center">
+          <View className="w-[120px] h-[120px] rounded-2xl overflow-hidden bg-gray-100 items-center justify-center">
+            <Image source={rightImage} className="w-full h-full" resizeMode="cover" />
           </View>
-          <TouchableOpacity style={styles.miniSwapButton} onPress={handleSwitch}>
+          <TouchableOpacity className="absolute top-2 right-2 w-8 h-8 rounded-full bg-gray-200 items-center justify-center" onPress={handleSwitch}>
             <Ionicons name="swap-horizontal" size={16} color="#666" />
           </TouchableOpacity>
         </Animated.View>
       </View>
 
       {/* 音频波形显示区域 */}
-      <View style={styles.waveformContainer}>
+      <View className="flex-1 bg-gray-100 rounded-2xl p-5 items-center justify-center">
         {/* 音频波形 - 使用简单的视觉表现 */}
-        <View style={styles.waveform}>
+        <View className="flex-row items-center justify-center h-[100px] mb-15">
           {barHeights.map((h, index) => (
             <View
               key={index}
-              style={[
-                styles.waveBar,
-                {
-                  height: h,
-                  opacity: isRecording ? 0.8 : 0.3,
-                },
-              ]}
+              className="w-[3px] bg-[#cbd5e0] mx-0.5 rounded-sm"
+              style={{
+                height: h,
+                opacity: isRecording ? 0.8 : 0.3,
+              }}
             />
           ))}
         </View>
 
         {/* 录音按钮 */}
         <TouchableOpacity
-          style={[styles.recordButton, isRecording && styles.recordButtonActive]}
+          className={`w-[140px] h-[140px] rounded-full items-center justify-center shadow-lg ${isRecording ? 'bg-[#ff5252]' : 'bg-[#ff6b6b]'}`}
           onPress={handleRecord}
         >
           <Ionicons name={isRecording ? 'square' : 'mic'} size={60} color="#fff" />
         </TouchableOpacity>
 
-        <Text style={styles.recordText}>{isRecording ? '录音中，点击停止' : '点击按钮开始录制'}</Text>
+        <Text className="mt-8 text-sm text-gray-400">{isRecording ? '录音中，点击停止' : '点击按钮开始录制'}</Text>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 60,
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 30,
-  },
-  avatarSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 30,
-    paddingHorizontal: 10,
-  },
-  avatarContainer: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-  },
-  dogAvatar: {
-    // allow same dimensions but keep option to customize
-    width: 120,
-    height: 120,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-  },
-  avatarWrapper: {
-    width: 120,
-    height: 120,
-    borderRadius: 20,
-    overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-  },
-  dogAvatarImage: {
-    // if you want the dog slightly smaller inside the wrapper
-    width: '100%',
-    height: '100%',
-  },
-  swapButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: '#1a3d5c',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-  },
-  miniSwapButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#e0e0e0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconAvatarContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconAvatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 20,
-    backgroundColor: '#1a3d5c',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconAvatarSecondary: {
-    width: 120,
-    height: 120,
-    borderRadius: 20,
-    backgroundColor: '#e18b4c',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  waveformContainer: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 20,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  waveform: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 100,
-    marginBottom: 60,
-  },
-  waveBar: {
-    width: 3,
-    backgroundColor: '#cbd5e0',
-    marginHorizontal: 2,
-    borderRadius: 2,
-  },
-  recordButton: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: '#ff6b6b',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#ff6b6b',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  recordButtonActive: {
-    backgroundColor: '#ff5252',
-  },
-  recordText: {
-    marginTop: 30,
-    fontSize: 14,
-    color: '#999',
-  },
-});

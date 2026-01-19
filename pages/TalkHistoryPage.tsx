@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 interface TalkRecord {
@@ -142,19 +142,19 @@ export default function TalkHistoryPage() {
   };
 
   const renderTalkRecord = (item: TalkRecord) => (
-    <TouchableOpacity style={styles.recordItem} activeOpacity={0.7} onPress={() => { /* placeholder for future action */ }}>
-      <View style={styles.recordIcon}>
-        <Text style={styles.iconText}>{getTypeIcon(item.type)}</Text>
+    <TouchableOpacity className="flex-row bg-white p-4 mb-0.5 items-center" activeOpacity={0.7} onPress={() => { /* placeholder for future action */ }}>
+      <View className="w-10 h-10 rounded-full bg-[#FF8C42] justify-center items-center mr-4">
+        <Text className="text-xl">{getTypeIcon(item.type)}</Text>
       </View>
-      <View style={styles.recordContent}>
-        <Text style={styles.recordType}>{item.type}</Text>
-        <Text style={styles.recordMessage}>{item.message}</Text>
-        <View style={styles.recordMeta}>
-          <Text style={styles.metaText}>⏱ {item.duration}秒</Text>
-          <Text style={styles.metaText}>🐕 {item.dogName}</Text>
+      <View className="flex-1">
+        <Text className="text-base font-bold text-gray-800 mb-1">{item.type}</Text>
+        <Text className="text-sm text-gray-600 mb-1.5">{item.message}</Text>
+        <View className="flex-row">
+          <Text className="text-xs text-gray-400 mr-4">⏱ {item.duration}秒</Text>
+          <Text className="text-xs text-gray-400">🐕 {item.dogName}</Text>
         </View>
       </View>
-      <Text style={styles.recordTime}>{item.time}</Text>
+      <Text className="text-xs text-gray-400">{item.time}</Text>
     </TouchableOpacity>
   );
 
@@ -199,35 +199,35 @@ export default function TalkHistoryPage() {
   }, {});
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-white">
       {/* 头部统计区域 */}
 
-      <View style={styles.statsSection}>
-        <Text style={styles.totalNumber}>
+      <View className="bg-[#FF8C42] items-center pb-10">
+        <Text className="text-white text-7xl font-bold">
           {timeFiltered.length}
-          <Text style={styles.unit}>条对话</Text>
+          <Text className="text-2xl font-normal">条对话</Text>
         </Text>
-        <Text style={styles.subStats}>今日新增 3 条</Text>
+        <Text className="text-white text-base mt-2">今日新增 3 条</Text>
       </View>
 
       {/* 对话记录列表 */}
       {/* 顶部类型过滤 */}
-      <View style={styles.typeFilterSection}>
+      <View className="flex-row px-4 py-3 bg-white justify-around items-center">
         {types.map((typ) => (
           <TouchableOpacity
             key={typ}
-            style={[styles.typeFilterItem, activeType === typ && styles.activeTypeFilter]}
+            className={`px-3 py-2 rounded-2xl border ${activeType === typ ? 'bg-[#FF8C42] border-[#FF8C42]' : 'bg-white border-gray-300'}`}
             onPress={() => setActiveType(typ)}
           >
-            <Text style={[styles.typeFilterText, activeType === typ && styles.activeTabText]}>{typ}</Text>
+            <Text className={`text-sm ${activeType === typ ? 'text-white font-bold' : 'text-gray-600'}`}>{typ}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <ScrollView style={styles.listSection} showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 bg-gray-100 px-5" showsVerticalScrollIndicator={false}>
         {Object.entries(groupedData).map(([date, records]) => (
-          <View key={date} style={styles.dateGroup}>
-            <Text style={styles.dateHeader}>{date}</Text>
+          <View key={date} className="my-2.5">
+            <Text className="text-base text-gray-400 mb-4 mt-2.5">{date}</Text>
             {records.map((record) => (
               <View key={record.id}>
                 {renderTalkRecord(record)}
@@ -237,190 +237,17 @@ export default function TalkHistoryPage() {
         ))}
       </ScrollView>
       {/* 底部时间范围标签 */}
-      <View style={styles.tabSection}>
+      <View className="flex-row bg-white py-5 px-10 justify-around border-t border-gray-200">
         {timeRanges.map((tr) => (
           <TouchableOpacity
             key={tr}
-            style={[styles.tabItem, timeRange === tr && styles.activeTab]}
+            className={`min-w-[56px] h-14 rounded-full justify-center items-center border ${timeRange === tr ? 'bg-[#FF8C42] border-[#FF8C42]' : 'border-gray-300'}`}
             onPress={() => setTimeRange(tr)}
           >
-            <Text style={[styles.tabText, timeRange === tr && styles.activeTabText]}>{tr === 'day' ? '日' : tr === 'week' ? '周' : tr === 'month' ? '月' : '全部'}</Text>
+            <Text className={`text-base ${timeRange === tr ? 'text-white font-bold' : 'text-gray-400'}`}>{tr === 'day' ? '日' : tr === 'week' ? '周' : tr === 'month' ? '月' : '全部'}</Text>
           </TouchableOpacity>
         ))}
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  headerSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    backgroundColor: '#FF8C42',
-  },
-  leftArrow: {
-    width: 30,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  arrowText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 8,
-  },
-  dropdownIcon: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  
-  statsSection: {
-    backgroundColor: '#FF8C42',
-    alignItems: 'center',
-    paddingBottom: 40,
-  },
-  totalNumber: {
-    color: '#fff',
-    fontSize: 72,
-    fontWeight: 'bold',
-  },
-  unit: {
-    fontSize: 24,
-    fontWeight: 'normal',
-  },
-  subStats: {
-    color: '#fff',
-    fontSize: 16,
-    marginTop: 8,
-  },
-  listSection: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 20,
-  },
-  typeFilterSection: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  typeFilterItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
-  },
-  typeFilterText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  activeTypeFilter: {
-    backgroundColor: '#FF8C42',
-    borderColor: '#FF8C42',
-  },
-  dateGroup: {
-    marginVertical: 10,
-  },
-  dateHeader: {
-    fontSize: 16,
-    color: '#999',
-    marginBottom: 15,
-    marginTop: 10,
-  },
-  recordItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 2,
-    alignItems: 'center',
-  },
-  recordIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FF8C42',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  iconText: {
-    fontSize: 20,
-  },
-  recordContent: {
-    flex: 1,
-  },
-  recordType: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  recordMessage: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 6,
-  },
-  recordMeta: {
-    flexDirection: 'row',
-  },
-  metaText: {
-    fontSize: 12,
-    color: '#999',
-    marginRight: 15,
-  },
-  recordTime: {
-    fontSize: 12,
-    color: '#999',
-  },
-  tabSection: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    paddingVertical: 20,
-    paddingHorizontal: 40,
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  tabItem: {
-    minWidth: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  activeTab: {
-    backgroundColor: '#FF8C42',
-    borderColor: '#FF8C42',
-  },
-  tabText: {
-    fontSize: 16,
-    color: '#999',
-  },
-  activeTabText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});

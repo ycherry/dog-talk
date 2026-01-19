@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,27 +10,27 @@ export default function AddDevicePage() {
   const [deviceId, setDeviceId] = useState('');
 
   return (
-    <SafeAreaView style={[styles.page]}> 
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+    <SafeAreaView className="flex-1 bg-white"> 
+      <View className="h-14 flex-row items-center justify-between px-3 border-b-[0.5px] border-gray-200">
+        <TouchableOpacity onPress={() => navigation.goBack()} className="w-10 h-10 items-center justify-center">
           <Ionicons name="chevron-back" size={28} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>添加设备</Text>
-        <View style={{width:40}} />
+        <Text className="text-lg font-semibold">添加设备</Text>
+        <View className="w-10" />
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.inputRow}>
-          <TextInput placeholder="请输入设备ID" style={styles.input} value={deviceId} onChangeText={setDeviceId} />
-          <TouchableOpacity style={styles.scanButton}>
+      <View className="p-4 items-center">
+        <View className="flex-row items-center w-full bg-white rounded-lg border border-gray-200 px-3 py-1.5">
+          <TextInput placeholder="请输入设备ID" className="flex-1 h-11" value={deviceId} onChangeText={setDeviceId} />
+          <TouchableOpacity className="w-11 h-11 items-center justify-center">
             <Ionicons name="scan" size={28} color="#333" />
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.hint}>请在设备背面找到编码输入，或扫码添加设备</Text>
+        <Text className="mt-5 text-gray-800 text-base">请在设备背面找到编码输入，或扫码添加设备</Text>
 
         <TouchableOpacity
-          style={styles.confirmButton}
+          className="mt-10 w-[90%] h-14 bg-white rounded-md border-[0.5px] border-gray-200 items-center justify-center"
           onPress={() => {
             if (!deviceId || deviceId.trim().length === 0) {
               return;
@@ -40,25 +40,9 @@ export default function AddDevicePage() {
             navigation.navigate('Main', { screen: 'Devices', params: { newDeviceId: deviceId.trim() } });
           }}
         >
-          <Text style={styles.confirmText}>确定</Text>
+          <Text className="text-[#ff7d00] text-lg font-semibold">确定</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#fff' },
-  header: { height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, borderBottomWidth: 0.5, borderBottomColor: '#eee' },
-  backButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  backText: { fontSize: 22 },
-  headerTitle: { fontSize: 18, fontWeight: '600' },
-  content: { padding: 16, alignItems: 'center' },
-  inputRow: { flexDirection: 'row', alignItems: 'center', width: '100%', backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#eee', paddingHorizontal: 12, paddingVertical: 6 },
-  input: { flex: 1, height: 44 },
-  scanButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  scanIcon: { width: 28, height: 28, tintColor: '#333' },
-  hint: { marginTop: 20, color: '#333', fontSize: 16 },
-  confirmButton: { marginTop: 40, width: '90%', height: 56, backgroundColor: '#fff', borderRadius: 6, borderWidth: 0.5, borderColor: '#eee', alignItems: 'center', justifyContent: 'center' },
-  confirmText: { color: '#ff7d00', fontSize: 18, fontWeight: '600' },
-});

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Dimensions, Platform } from 'react-native';
+import { View, Dimensions, Platform } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
@@ -58,7 +58,7 @@ export default function MapPageReal({
   // 地图配置
   const mapProps = {
     ref: mapRef,
-    style: styles.map,
+    style: { width, height },
     initialRegion: region,
     mapType,
     showsUserLocation: true,
@@ -78,8 +78,17 @@ export default function MapPageReal({
         title="宠物位置"
         description="您的宠物在这里"
       >
-        <View style={styles.markerContainer}>
-          <View style={styles.marker}>
+        <View className="items-center">
+          <View 
+            className="bg-[#007AFF] rounded-full w-[50px] h-[50px] items-center justify-center border-[3px] border-white"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 3,
+              elevation: 5,
+            }}
+          >
             <Ionicons name="paw" size={24} color="white" />
           </View>
         </View>
@@ -101,28 +110,3 @@ export default function MapPageReal({
     </MapView>
   );
 }
-
-const styles = StyleSheet.create({
-  map: {
-    width: width,
-    height: height,
-  },
-  markerContainer: {
-    alignItems: 'center',
-  },
-  marker: {
-    backgroundColor: '#007AFF',
-    borderRadius: 25,
-    width: 50,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-  },
-});
