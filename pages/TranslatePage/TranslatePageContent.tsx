@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Text, View, TouchableOpacity, Image, Animated, ImageSourcePropType, Platform, Alert } from 'react-native';
+import { Text, View, TouchableOpacity, Image, Animated, ImageSourcePropType, Platform, Alert, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
@@ -8,19 +8,30 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Local images
 import avatarImg from '../../assets/avatar.png';
-import dogImg from '../../assets/dog.png';
+import dogImg from '../../assets/dog-icon.png';
+
+type MessageType = {
+  id: string;
+  type: 'dog' | 'human';
+  content: string;
+  audioUri?: string;
+  timestamp: Date;
+};
 
 export const TranslatePageContent = () => {
   const navigation = useNavigation();
   const [isRecording, setIsRecording] = useState(false);
   const leftScale = useRef(new Animated.Value(1)).current;
   const rightScale = useRef(new Animated.Value(1)).current;
-  const [leftImage, setLeftImage] = useState<ImageSourcePropType>(avatarImg);
-  const [rightImage, setRightImage] = useState<ImageSourcePropType>(dogImg);
+  const [leftImage, setLeftImage] = useState<ImageSourcePropType>(dogImg);
+  const [rightImage, setRightImage] = useState<ImageSourcePropType>(avatarImg);
+  const [recordingMode, setRecordingMode] = useState<'dog' | 'human'>('dog'); // 'dog' = 录狗语, 'human' = 录人语
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const [barHeights, setBarHeights] = useState<number[]>(() => Array(40).fill(20));
   const waveformInterval = useRef<number | null>(null);
   const recordingRef = useRef<Audio.Recording | null>(null);
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
+  const [playingSound, setPlayingSound] = useState<Audio.Sound | null>(null);
 
   useEffect(() => {
     return () => {
@@ -37,8 +48,12 @@ export const TranslatePageContent = () => {
         }
         recordingRef.current = null;
       }
+      // cleanup playing sound
+      if (playingSound) {
+        playingSound.unloadAsync();
+      }
     };
-  }, []);
+  }, [playingSound]);
 
   const handleRecord = async () => {
     // Toggle recording state and start/stop actual recording
@@ -174,6 +189,29 @@ export const TranslatePageContent = () => {
           }
           const uri = recording.getURI();
           setRecordingUri(uri);
+          
+          // 模拟翻译结果并添加到消息列表
+          if (recordingMode === 'dog') {
+            // 录的是狗语，翻译成人语文字
+            const newMessage: MessageType = {
+              id: Date.now().toString(),
+              type: 'dog',
+              content: '阳光和你的怀抱，都是暖的。',
+              timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, newMessage]);
+          } else {
+            // 录的是人语，翻译成狗语音频
+            const newMessage: MessageType = {
+              id: Date.now().toString(),
+              type: 'human',
+              content: '',
+              audioUri: uri || undefined,
+              timestamp: new Date(),
+            };
+            setMessages(prev => [...prev, newMessage]);
+          }
+          
           recordingRef.current = null;
         }
 
@@ -203,17 +241,45 @@ export const TranslatePageContent = () => {
     ]);
     Animated.parallel([animLeft, animRight]).start();
 
-    // 交换左右图片
+    // 交换左右图片和录音模式
     setLeftImage(prev => {
       setRightImage(prevRight => prev);
       return rightImage;
     });
+    
+    setRecordingMode(prev => prev === 'dog' ? 'human' : 'dog');
+  };
+  
+  const playAudio = async (uri: string) => {
+    try {
+      // 如果已有正在播放的音频，先卸载
+      if (playingSound) {
+        await playingSound.unloadAsync();
+      }
+      
+      const { sound } = await Audio.Sound.createAsync(
+        { uri },
+        { shouldPlay: true }
+      );
+      
+      setPlayingSound(sound);
+      
+      // 播放完成后卸载
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          sound.unloadAsync();
+          setPlayingSound(null);
+        }
+      });
+    } catch (error) {
+      console.error('Error playing audio:', error);
+    }
   };
 
   return (
     <View className="flex-1 bg-white pt-15 px-5">
       {/* 标题 */}
-      <Text className="text-xl font-semibold text-gray-800 mb-8">宠物翻译助手</Text>
+      <Text className="text-xl font-semibold text-gray-800 mb-8">Traini宠物翻译助手</Text>
 
       {/* 人物和宠物头像区域（使用图片替代图标） */}
       <View className="flex-row items-center justify-between mb-8 px-2.5">
@@ -221,6 +287,11 @@ export const TranslatePageContent = () => {
           <View className="w-[120px] h-[120px] rounded-2xl overflow-hidden bg-gray-100 items-center justify-center">
             <Image source={leftImage} className="w-full h-full" resizeMode="cover" />
           </View>
+          {recordingMode === 'dog' && (
+            <View className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 items-center justify-center">
+              <Ionicons name="swap-horizontal" size={16} color="#666" />
+            </View>
+          )}
         </Animated.View>
 
         <TouchableOpacity className="w-14 h-14 rounded-xl bg-[#1a3d5c] items-center justify-center mx-5" onPress={handleSwitch}>
@@ -231,9 +302,11 @@ export const TranslatePageContent = () => {
           <View className="w-[120px] h-[120px] rounded-2xl overflow-hidden bg-gray-100 items-center justify-center">
             <Image source={rightImage} className="w-full h-full" resizeMode="cover" />
           </View>
-          <TouchableOpacity className="absolute top-2 right-2 w-8 h-8 rounded-full bg-gray-200 items-center justify-center" onPress={handleSwitch}>
-            <Ionicons name="swap-horizontal" size={16} color="#666" />
-          </TouchableOpacity>
+          {recordingMode === 'human' && (
+            <View className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 items-center justify-center">
+              <Ionicons name="swap-horizontal" size={16} color="#666" />
+            </View>
+          )}
         </Animated.View>
       </View>
 
@@ -261,8 +334,56 @@ export const TranslatePageContent = () => {
           <Ionicons name={isRecording ? 'square' : 'mic'} size={60} color="#fff" />
         </TouchableOpacity>
 
-        <Text className="mt-8 text-sm text-gray-400">{isRecording ? '录音中，点击停止' : '点击按钮开始录制'}</Text>
+        <Text className="mt-8 text-sm text-gray-400">{isRecording ? '录音中，点击停止' : '点击按钮完成录制'}</Text>
       </View>
+
+      {/* 翻译消息列表 */}
+      {messages.length > 0 && (
+        <View className="bg-gray-50 rounded-2xl p-4 mt-4" style={{ maxHeight: 200 }}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {messages.map((message) => (
+              <View key={message.id} className="mb-3">
+                {message.type === 'dog' ? (
+                  // 狗语翻译结果 - 显示文字（右侧，狗头像）
+                  <View className="flex-row justify-end items-start">
+                    <View className="bg-[#1a3d5c] rounded-2xl rounded-tr-sm px-4 py-3 max-w-[70%] mr-2">
+                      <Text className="text-white text-base">{message.content}</Text>
+                    </View>
+                    <View className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                      <Image source={dogImg} className="w-full h-full" resizeMode="cover" />
+                    </View>
+                  </View>
+                ) : (
+                  // 人语翻译结果 - 显示音频播放按钮（左侧，人头像）
+                  <View className="flex-row justify-start items-center">
+                    <View className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 mr-2">
+                      <Image source={avatarImg} className="w-full h-full" resizeMode="cover" />
+                    </View>
+                    <TouchableOpacity
+                      className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 flex-row items-center border border-gray-200"
+                      onPress={() => message.audioUri && playAudio(message.audioUri)}
+                    >
+                      <Ionicons name="play" size={20} color="#1a3d5c" />
+                      <View className="flex-row ml-2">
+                        {[...Array(15)].map((_, i) => (
+                          <View
+                            key={i}
+                            className="w-[2px] bg-gray-400 mx-0.5 rounded-sm"
+                            style={{ height: 12 + Math.random() * 8 }}
+                          />
+                        ))}
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* 底部提示文字 */}
+      <Text className="text-center text-xs text-gray-400 mt-4 mb-2">该功能仅供娱乐</Text>
     </View>
   );
 };

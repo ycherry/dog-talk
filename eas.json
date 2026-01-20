@@ -17,12 +17,11 @@
     "production": {
       "autoIncrement": true,
       "android": { 
-        "buildType": "apk",
-        "env": {
-          "AMAP_API_KEY": "你的高德地图API_KEY"
-        }
+        "buildType": "apk"
       },
-      "prebuildCommand": "node scripts/configure-amap.js"
+      "env": {
+        "AMAP_API_KEY": "5f498af4af603f8e2acef9f5eb025043"
+      }
     }
   },
   "submit": {

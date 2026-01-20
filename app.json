@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/dog-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -47,8 +47,8 @@
           "locationAlwaysAndWhenInUsePermission": "此应用需要访问您的位置以显示您和宠物在地图上的位置。"
         }
       ],
-      "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "expo-font"
     ],
     "extra": {
       "eas": {
