@@ -1,89 +1,136 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Dimensions, Text, ActivityIndicator } from 'react-native';
+import { View, Dimensions, Text, ActivityIndicator, Platform, PermissionsAndroid, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
-import * as Location from 'expo-location';
-
-// @ts-ignore
-import * as coordtransform from 'coordtransform';
+import {
+  init,
+  addLocationListener,
+  start,
+  stop,
+  setInterval as setAmapInterval,
+  setLocationMode,
+  setNeedAddress,
+  setDistanceFilter,
+  setAllowsBackgroundLocationUpdates,
+  LocationMode
+} from 'react-native-amap-geolocation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
+const AMAP_KEY_ANDROID = "5f498af4af603f8e2acef9f5eb025043";
+const AMAP_KEY_IOS = "5f498af4af603f8e2acef9f5eb025043";
+
 interface MapPageRealProps {
-  onCenterOnPet: () => void;
-  onToggleMapType: () => void;
-  mapRef: React.RefObject<any>;
-  mapType: 'standard' | 'satellite' | 'hybrid';
+  onCenterOnPet?: () => void;
+  onToggleMapType?: () => void;
+  mapRef?: React.RefObject<any>;
+  mapType?: 'standard' | 'satellite' | 'hybrid';
 }
 
-export default function MapPageReal({ 
-  onCenterOnPet, 
-  onToggleMapType, 
-  mapRef, 
-  mapType 
-}: MapPageRealProps) {
+export default function MapPageReal({ onCenterOnPet, onToggleMapType, mapRef, mapType }: MapPageRealProps) {
   const webViewRef = useRef<WebView>(null);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number; accuracy?: number | null } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [logs, setLogs] = useState<string[]>([]);
   const [locationReady, setLocationReady] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
-  const locationSubscription = useRef<Location.LocationSubscription | null>(null);
-  
-  const petLocationWGS = { lat: 31.218, lng: 121.475 };
-  const [petGcjLng, petGcjLat] = coordtransform.wgs84togcj02(petLocationWGS.lng, petLocationWGS.lat);
-  const petLocation = { lat: petGcjLat, lng: petGcjLng };
+
+  // 使用固定的宠物位置（已是 GCJ-02）
+  const petLocation = { lat: 31.218, lng: 121.475 };
+
+  // 申请高精度权限（如果需要）
+  const requestHighAccuracyPermission = async () => {
+    if (Platform.OS === 'android' && Platform.Version >= 31) {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: '定位权限申请',
+            message: '需要获取您的精确位置以显示地图',
+            buttonNeutral: '稍后再问',
+            buttonNegative: '取消',
+            buttonPositive: '允许'
+          }
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.error('申请精确位置权限失败:', err);
+        return false;
+      }
+    }
+    return true;
+  };
 
   useEffect(() => {
+    let locationListener: any;
+
     const getLocation = async () => {
       try {
-        console.log('正在获取位置权限...');
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          console.log('位置权限被拒绝，使用默认位置');
-          setUserLocation({ lat: 31.22, lng: 121.48 });
-          setLocationReady(true);
+        // 先请求 Android 的精确定位权限，保证首次打开时弹出询问
+        if (Platform.OS === 'android') {
+          try {
+            const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+              console.log('用户拒绝了 ACCESS_FINE_LOCATION');
+            }
+          } catch (err) {
+            console.warn('请求ACCESS_FINE_LOCATION失败', err);
+          }
+        }
+
+        await init({ ios: AMAP_KEY_IOS, android: AMAP_KEY_ANDROID });
+
+        const hasFinePermission = await requestHighAccuracyPermission();
+        if (!hasFinePermission) {
+          console.log('精确位置权限被拒绝');
+          Alert.alert('权限不足', '需要精确位置权限才能获取高精度定位');
           return;
         }
 
-        console.log('正在获取当前位置...');
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Highest,
-        });
-        
-        console.log('设备返回位置:', location.coords.longitude, location.coords.latitude);
-        
-        // 将WGS84坐标转换为GCJ02坐标（中国地图坐标系）
-        const [gcjLng, gcjLat] = coordtransform.wgs84togcj02(location.coords.longitude, location.coords.latitude);
-        const newLocation = {
-          lat: gcjLat,
-          lng: gcjLng,
-        };
-        
-        setUserLocation(newLocation);
-        setLocationReady(true);
-        console.log('✅ 用户位置获取成功:', newLocation);
+        if (Platform.OS === 'android') {
+          setAmapInterval(5000);
+          setNeedAddress(false);
+          setLocationMode(LocationMode.Hight_Accuracy);
+        } else if (Platform.OS === 'ios') {
+          setDistanceFilter(3);
+          setAllowsBackgroundLocationUpdates(true);
+        }
 
-        // 开始监听位置变化
-        locationSubscription.current = await Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.Highest,
-            timeInterval: 5000, // 每5秒更新一次
-            distanceInterval: 10, // 移动10米时更新
-          },
-          (location) => {
-            console.log('监听位置更新:', location.coords.longitude, location.coords.latitude);
-            // 中国的GPS已经是GCJ-02，无需转换
-            const updatedLocation = {
-              lat: location.coords.latitude,
-              lng: location.coords.longitude,
+        locationListener = addLocationListener(location => {
+          if (!location) return;
+          const newLocation = {
+            lat: location.latitude,
+            lng: location.longitude,
+            accuracy: location.accuracy
+          };
+
+          console.log('MapPage pos (AMap):', newLocation);
+          setUserLocation(newLocation);
+          setLocationReady(true);
+
+          // 将位置信息发送到 WebView（使用与 TrackPage 相同的 dispatchEvent message 方式）
+          try {
+            const payload = {
+              type: 'posUpdate',
+              lat: newLocation.lat,
+              lng: newLocation.lng,
+              accuracy: newLocation.accuracy,
+              timestamp: Date.now(),
+              coordinateSystem: 'GCJ-02'
             };
-            setUserLocation(updatedLocation);
-            console.log('📍 用户位置更新:', updatedLocation);
+            if (webViewRef.current) {
+              const msg = JSON.stringify(payload).replace(/'/g, "\\'");
+              webViewRef.current.injectJavaScript(`(function(){ if(window.dispatchEvent){window.dispatchEvent(new MessageEvent('message', {data: '${msg}'}));} })(); true;`);
+            }
+          } catch (e) {
+            console.warn('向WebView发送位置信息失败', e);
           }
-        );
+        });
+
+        start();
       } catch (error) {
-        console.error('获取位置失败:', error);
-        setUserLocation({ lat: 31.22, lng: 121.48 });
+        console.error('定位初始化失败:', error);
+        setUserLocation({ lat: 31.22, lng: 121.48, accuracy: 1000 });
         setLocationReady(true);
       }
     };
@@ -91,9 +138,8 @@ export default function MapPageReal({
     getLocation();
 
     return () => {
-      if (locationSubscription.current) {
-        locationSubscription.current.remove();
-      }
+      if (locationListener) locationListener.remove();
+      stop();
     };
   }, []);
 
@@ -102,11 +148,9 @@ export default function MapPageReal({
       const data = JSON.parse(event.nativeEvent.data);
       console.log('WebView message:', data);
       setLogs(prev => [...prev.slice(-4), data.message]);
-      
       if (data.type === 'mapReady') {
         setIsLoading(false);
         setIsMapReady(true);
-        console.log('✅ 地图加载成功');
       }
     } catch (error) {
       console.error('处理消息失败:', error);
@@ -115,13 +159,13 @@ export default function MapPageReal({
 
   useEffect(() => {
     if (webViewRef.current && isMapReady && userLocation) {
-      const jsCode = `updateUserMarker(${userLocation.lat}, ${userLocation.lng}); true;`;
+      const jsCode = `updateUserMarker(${userLocation.lat}, ${userLocation.lng}, ${userLocation.accuracy}); true;`;
       webViewRef.current.injectJavaScript(jsCode);
     }
   }, [userLocation, isMapReady]);
 
   useEffect(() => {
-    if (webViewRef.current && !isLoading) {
+    if (webViewRef.current && !isLoading && mapType) {
       const jsCode = `updateMapType('${mapType}'); true;`;
       webViewRef.current.injectJavaScript(jsCode);
     }
@@ -129,13 +173,13 @@ export default function MapPageReal({
 
   if (!locationReady || !userLocation) {
     return (
-      <View className="flex-1 justify-center items-center bg-[#f0f0f0]">
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f0f0' }}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text className="mt-2.5 text-base text-[#666]">正在获取位置...</Text>
+        <Text style={{ marginTop: 8, color: '#666' }}>正在获取位置...</Text>
       </View>
     );
   }
-
+  // HTML 初始化为占位中心 (0,0)，WebView 将通过接收到的 posUpdate 来更新用户位置并调整视图
   const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -232,9 +276,10 @@ export default function MapPageReal({
         
         sendLog('Step 4: Creating map');
 
+        // 占位中心，[0,0]。收到 RN 端的 posUpdate 后会通过 updateUserMarker 来设置视野
         map = L.map('map', {
-          center: [${userLocation.lat}, ${userLocation.lng}],
-          zoom: 15,
+          center: [0, 0],
+          zoom: 2,
           zoomControl: true,
           attributionControl: false
         });
@@ -298,7 +343,8 @@ export default function MapPageReal({
           iconAnchor: [10, 10]
         });
 
-        userMarker = L.marker([${userLocation.lat}, ${userLocation.lng}], {
+        // 创建占位 user marker，实际位置将在 updateUserMarker 中设置
+        userMarker = L.marker([0, 0], {
           icon: blueIcon
         }).addTo(map);
         userMarker.bindPopup('<b>我的位置</b>');
@@ -375,12 +421,26 @@ export default function MapPageReal({
       }
     }
 
-    function updateUserMarker(lat, lng) {
+    // 与 TrackPage 保持一致：更新用户 marker 并根据当前视图状况决定是否缩放/居中
+    function updateUserMarker(lat, lng, accuracy) {
       if (!map || !userMarker) return;
-      
-      sendLog('Updating user marker to: ' + lat + ', ' + lng);
+      if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+        sendLog('Invalid coords in updateUserMarker: ' + lat + ',' + lng);
+        return;
+      }
+      const displayAccuracy = (typeof accuracy === 'number' && !isNaN(accuracy)) ? accuracy : 100;
+      sendLog('Updating user marker to: ' + lat + ', ' + lng + ' (精度: ' + displayAccuracy + '米)');
       try {
         userMarker.setLatLng([lat, lng]);
+        userMarker.setPopupContent('<b>我的位置</b><br>精度: ' + displayAccuracy + ' 米');
+
+        if (map.getZoom() < 10 || (map.getCenter().lat === 0 && map.getCenter().lng === 0)) {
+          map.setView([lat, lng], 18);
+        } else {
+          map.panTo([lat, lng]);
+        }
+
+        // 如果存在 circle（宠物周边或其他），不做特殊处理
         sendLog('User marker updated');
       } catch(e) {
         sendLog('ERROR updating user marker: ' + e.message);
