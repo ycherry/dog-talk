@@ -11,6 +11,8 @@ import { TalkHistoryPage } from './pages/TalkHistoryPage';
 import { MyProfilePage } from './pages/MyProfilePage';
 import { LoginPage } from './pages/LoginPage';
 import { AddDevicePage } from './pages/AddDevicePage';
+import { TrackPage } from './pages/TrackPage';
+import { TrackHistoryPage } from './pages/TrackHistoryPage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -23,50 +25,52 @@ function MainTabs() {
         tabBarInactiveTintColor: 'gray',
       }}
     >
-      <Tab.Screen 
-        name="Map" 
+      <Tab.Screen
+        name="Map"
         component={MapPage}
-        options={{ 
+        options={{
           title: 'Map',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="map" color={color} size={size} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="Devices" 
-        component={DevicesPage}
-        options={{ 
-          title: 'Devices',
+      <Tab.Screen
+        name="Track"
+        component={TrackPage}
+        options={{
+          title: 'Trajectory',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="paw" color={color} size={size} />
+            <Ionicons name="navigate" color={color} size={size} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="Translate" 
+      {/* Devices moved into MyProfile */}
+      <Tab.Screen
+        name="Translate"
         component={TranslatePage}
-        options={{ 
+        options={{
           title: 'Translate',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubbles" color={color} size={size} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="TalkHistory" 
+      <Tab.Screen
+        name="TalkHistory"
         component={TalkHistoryPage}
-        options={{ 
+        options={{
           title: 'Wang log',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubble-ellipses" color={color} size={size} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="MyProfile" 
+      {/* TrackHistory moved into MyProfile */}
+      <Tab.Screen
+        name="MyProfile"
         component={MyProfilePage}
-        options={{ 
+        options={{
           title: 'My Profile',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" color={color} size={size} />
@@ -84,6 +88,8 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="AddDevice" component={AddDevicePage} />
+        <Stack.Screen name="Devices" component={DevicesPage} />
+        <Stack.Screen name="TrackHistory" component={TrackHistoryPage} />
       </Stack.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>

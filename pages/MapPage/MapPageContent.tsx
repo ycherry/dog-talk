@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import MapPageMock from '../MapPage.mock';
+import MapPageMock from './MapPage.mock';
 
 // 检测是否在 Expo Go 中运行
 const isExpoGo = Constants.appOwnership === 'expo';
@@ -10,7 +10,7 @@ const isExpoGo = Constants.appOwnership === 'expo';
 // 动态导入真实地图组件（仅在非Expo Go环境）
 let MapPageReal: any = null;
 if (!isExpoGo) {
-  MapPageReal = require('../MapPage.real').default;
+  MapPageReal = require('./MapPage.real').default;
 }
 
 export const MapPageContent = () => {

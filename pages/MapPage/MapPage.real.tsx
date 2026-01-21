@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Dimensions, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import { View, Dimensions, Text, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Location from 'expo-location';
 
@@ -48,17 +48,12 @@ export default function MapPageReal({
         console.log('正在获取当前位置...');
         const location = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Highest,
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 10000,
         });
         
-        // 将 WGS-84 坐标转换为 GCJ-02（高德地图坐标系）
-        const [gcjLng, gcjLat] = coordtransform.wgs84togcj02(
-          location.coords.longitude, 
-          location.coords.latitude
-        );
+        console.log('设备返回位置:', location.coords.longitude, location.coords.latitude);
         
+        // 将WGS84坐标转换为GCJ02坐标（中国地图坐标系）
+        const [gcjLng, gcjLat] = coordtransform.wgs84togcj02(location.coords.longitude, location.coords.latitude);
         const newLocation = {
           lat: gcjLat,
           lng: gcjLng,
@@ -66,27 +61,24 @@ export default function MapPageReal({
         
         setUserLocation(newLocation);
         setLocationReady(true);
-        console.log('✅ 用户位置获取成功 (GCJ-02):', newLocation);
+        console.log('✅ 用户位置获取成功:', newLocation);
 
         // 开始监听位置变化
         locationSubscription.current = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.Highest,
-            enableHighAccuracy: true,
             timeInterval: 5000, // 每5秒更新一次
             distanceInterval: 10, // 移动10米时更新
           },
           (location) => {
-            const [gcjLng, gcjLat] = coordtransform.wgs84togcj02(
-              location.coords.longitude,
-              location.coords.latitude
-            );
+            console.log('监听位置更新:', location.coords.longitude, location.coords.latitude);
+            // 中国的GPS已经是GCJ-02，无需转换
             const updatedLocation = {
-              lat: gcjLat,
-              lng: gcjLng,
+              lat: location.coords.latitude,
+              lng: location.coords.longitude,
             };
             setUserLocation(updatedLocation);
-            console.log('📍 用户位置更新 (GCJ-02):', updatedLocation);
+            console.log('📍 用户位置更新:', updatedLocation);
           }
         );
       } catch (error) {
@@ -137,9 +129,9 @@ export default function MapPageReal({
 
   if (!locationReady || !userLocation) {
     return (
-      <View style={styles.loadingContainer}>
+      <View className="flex-1 justify-center items-center bg-[#f0f0f0]">
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>正在获取位置...</Text>
+        <Text className="mt-2.5 text-base text-[#666]">正在获取位置...</Text>
       </View>
     );
   }
@@ -249,7 +241,7 @@ export default function MapPageReal({
 
         sendLog('Step 5: Map created');
 
-        currentLayer = L.tileLayer('https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=2&scale=2&style=8&x={x}&y={y}&z={z}', {
+        currentLayer = L.tileLayer('https://webrd01.is.autonavi.com/appmaptile?key=5f498af4af603f8e2acef9f5eb025043&lang=zh_cn&size=2&scale=2&style=8&x={x}&y={y}&z={z}', {
           maxZoom: 19,
           attribution: '© 高德地图',
           subdomains: ['webrd01', 'webrd02', 'webrd03', 'webrd04']
@@ -344,12 +336,12 @@ export default function MapPageReal({
         }
 
         if (type === 'satellite' || type === 'hybrid') {
-          currentLayer = L.tileLayer('https://webst01.is.autonavi.com/appmaptile?style=6&size=2&scale=2&x={x}&y={y}&z={z}', {
+          currentLayer = L.tileLayer('https://webst01.is.autonavi.com/appmaptile?key=5f498af4af603f8e2acef9f5eb025043&style=6&size=2&scale=2&x={x}&y={y}&z={z}', {
             maxZoom: 19,
             attribution: '© 高德地图'
           });
         } else {
-          currentLayer = L.tileLayer('https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=2&scale=2&style=8&x={x}&y={y}&z={z}', {
+          currentLayer = L.tileLayer('https://webrd01.is.autonavi.com/appmaptile?key=5f498af4af603f8e2acef9f5eb025043&lang=zh_cn&size=2&scale=2&style=8&x={x}&y={y}&z={z}', {
             maxZoom: 19,
             attribution: '© 高德地图',
             subdomains: ['webrd01', 'webrd02', 'webrd03', 'webrd04']
@@ -412,7 +404,7 @@ export default function MapPageReal({
   `;
 
   return (
-    <View style={{ width, height, backgroundColor: '#f0f0f0' }}>
+    <View style={{ width, height }} className="bg-[#f0f0f0]">
       <WebView
         ref={webViewRef}
         source={{ html: htmlContent }}
@@ -442,13 +434,13 @@ export default function MapPageReal({
       />
       
       {isLoading && (
-        <View style={styles.loadingContainer}>
+        <View className="absolute inset-0 justify-center items-center bg-white">
           <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.loadingText}>正在加载地图...</Text>
+          <Text className="mt-2 text-base text-gray-600">正在加载地图...</Text>
           {logs.length > 0 && (
-            <View style={styles.logContainer}>
+            <View className="mt-5 p-2 bg-black/5 rounded max-w-[80%]">
               {logs.map((log, index) => (
-                <Text key={index} style={styles.logText}>{log}</Text>
+                <Text key={index} className="text-xs text-gray-800 my-1">{log}</Text>
               ))}
             </View>
           )}
@@ -457,33 +449,4 @@ export default function MapPageReal({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white'
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666'
-  },
-  logContainer: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 5,
-    maxWidth: '80%'
-  },
-  logText: {
-    fontSize: 12,
-    color: '#333',
-    marginVertical: 2
-  }
-});
+ 

@@ -58,6 +58,22 @@ export const MyProfilePageContent = () => {
           <Text className="flex-1 text-base ml-2.5">设置</Text>
           <Ionicons name="chevron-forward" size={24} color="#ccc" />
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Devices')}
+          className="flex-row items-center py-4 border-b border-gray-200"
+        >
+          <Ionicons name="paw" size={24} color="#333" />
+          <Text className="flex-1 text-base ml-2.5">设备管理</Text>
+          <Ionicons name="chevron-forward" size={24} color="#ccc" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('TrackHistory')}
+          className="flex-row items-center py-4 border-b border-gray-200"
+        >
+          <Ionicons name="footsteps" size={24} color="#333" />
+          <Text className="flex-1 text-base ml-2.5">我的足迹</Text>
+          <Ionicons name="chevron-forward" size={24} color="#ccc" />
+        </TouchableOpacity>
         <TouchableOpacity className="flex-row items-center py-4 border-b border-gray-200">
           <Ionicons name="help-circle" size={24} color="#333" />
           <Text className="flex-1 text-base ml-2.5">帮助</Text>
