@@ -412,12 +412,6 @@ export default function TrackPageReal({ trackRef, isRecording }: TrackPageRealPr
 </head>
 <body>
   <div id="loading">加载中...</div>
-  <div id="stats">
-    <h3>定位信息</h3>
-    <p id="posInfo">等待位置...</p>
-    <p id="posTimestamp" style="font-size:11px;color:#666;margin-top:6px;"></p>
-    <p id="posCoordSys" style="font-size:11px;color:#666;margin-top:2px;"></p>
-  </div>
   <div id="map"></div>
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -454,17 +448,10 @@ export default function TrackPageReal({ trackRef, isRecording }: TrackPageRealPr
         }
         if (!data) return;
 
-        // If this is a posUpdate, update UI and map
+        // If this is a posUpdate, update map and log
         if (data.type === 'posUpdate') {
           var info = 'lat: ' + data.lat + ', lng: ' + data.lng + ' (精度: ' + (data.accuracy || 'N/A') + ' 米)';
           sendLog('Received posUpdate: ' + info + ' @' + (data.timestamp || 'N/A'));
-          var el = document.getElementById('posInfo');
-          if (el) el.textContent = info;
-          var tEl = document.getElementById('posTimestamp');
-          if (tEl) tEl.textContent = '时间: ' + (data.timestamp ? new Date(data.timestamp).toLocaleString() : 'N/A');
-          var cEl = document.getElementById('posCoordSys');
-          if (cEl) cEl.textContent = '坐标系: ' + (data.coordinateSystem || '未知');
-
           // call map updater if available
           if (typeof updateUserMarker === 'function') {
             updateUserMarker(Number(data.lat), Number(data.lng), Number(data.accuracy));
